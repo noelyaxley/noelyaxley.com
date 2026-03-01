@@ -73,8 +73,8 @@ export function HeroSection() {
   const scrollSquiggleOpacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   // Title + nav: fixed at top, scroll away together
-  const titleY = useTransform(scrollY, [300, 500], [0, -60]);
-  const titleOpacity = useTransform(scrollY, [300, 500], [1, 0]);
+  const titleY = useTransform(scrollY, [450, 650], [0, -60]);
+  const titleOpacity = useTransform(scrollY, [450, 650], [1, 0]);
 
   // Motion values controlled first by initial animation, then by scroll
   const lidRotation = useMotionValue(0);
