@@ -94,7 +94,7 @@ export function HeroSection() {
       </motion.p>
 
       {/* Main content: Head + Ventures */}
-      <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-4">
+      <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-6 lg:gap-2">
         {/* Left: Head graphic + Squiggles — 65% width */}
         <motion.div
           className="relative flex-shrink-0 lg:w-[65%] flex justify-center overflow-visible"

@@ -11,7 +11,7 @@ export function HeadLayers({ onLidOpen }: HeadLayersProps) {
   // The forehead split line sits at roughly 55% from the top.
   // Pivot: left edge (0%) at the split line (55%) — the lid hinges open from there.
   return (
-    <div className="relative w-[312px] sm:w-[384px] lg:w-[480px] overflow-visible">
+    <div className="relative w-[312px] sm:w-[384px] lg:w-[480px] pb-6 overflow-visible">
       {/* Head bottom — defines the container height via natural aspect ratio */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
