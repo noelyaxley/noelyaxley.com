@@ -25,7 +25,7 @@ export function Navigation() {
   }, []);
 
   const navStart = isDesktop ? 80 : 350;
-  const navEnd = isDesktop ? 220 : 550;
+  const navEnd = isDesktop ? 220 : 500;
   const navOpacity = useTransform(scrollY, [navStart, navEnd], [1, 0]);
   const navY = useTransform(scrollY, [navStart, navEnd], [0, -30]);
 
