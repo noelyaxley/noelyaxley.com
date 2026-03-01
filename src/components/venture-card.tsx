@@ -58,6 +58,7 @@ function SiteThumbnail({ url, name, accent }: { url: string; name: string; accen
         title={`${name} preview`}
         loading="lazy"
         tabIndex={-1}
+        sandbox="allow-scripts allow-same-origin"
         className="absolute top-0 left-0 pointer-events-none border-0 z-10"
         style={{
           width: IFRAME_W,
@@ -66,6 +67,8 @@ function SiteThumbnail({ url, name, accent }: { url: string; name: string; accen
           transformOrigin: "top left",
         }}
       />
+      {/* Transparent overlay to block any iframe touch/click leaks on mobile */}
+      <div className="absolute inset-0 z-20" />
     </div>
   );
 }
