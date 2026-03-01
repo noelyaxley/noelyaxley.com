@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Linkedin, Instagram } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -14,8 +15,19 @@ const iconStyle = {
 
 export function Navigation() {
   const { scrollY } = useScroll();
-  const navOpacity = useTransform(scrollY, [150, 350], [1, 0]);
-  const navY = useTransform(scrollY, [150, 350], [0, -30]);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const navStart = isDesktop ? 80 : 450;
+  const navEnd = isDesktop ? 220 : 650;
+  const navOpacity = useTransform(scrollY, [navStart, navEnd], [1, 0]);
+  const navY = useTransform(scrollY, [navStart, navEnd], [0, -30]);
 
   return (
     <motion.nav

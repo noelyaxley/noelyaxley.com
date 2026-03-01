@@ -64,17 +64,27 @@ const VENTURES = [
 ];
 
 export function HeroSection() {
-  const { scrollY } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const [scrollMode, setScrollMode] = useState(false);
   const [cardsVisible, setCardsVisible] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  // Scroll-mapped targets
-  const scrollLidRotation = useTransform(scrollY, [0, 400], [-45, 0]);
-  const scrollSquiggleOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-  // Title + nav: fixed at top, scroll away together
-  const titleY = useTransform(scrollY, [450, 650], [0, -60]);
-  const titleOpacity = useTransform(scrollY, [450, 650], [1, 0]);
+  // Lid + squiggles: progress-based so they scale with page height
+  const scrollLidRotation = useTransform(scrollYProgress, [0, 0.6], [-45, 0]);
+  const scrollSquiggleOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+
+  // Title: responsive pixel thresholds (desktop has less scroll range)
+  const titleStart = isDesktop ? 80 : 450;
+  const titleEnd = isDesktop ? 220 : 650;
+  const titleY = useTransform(scrollY, [titleStart, titleEnd], [0, -60]);
+  const titleOpacity = useTransform(scrollY, [titleStart, titleEnd], [1, 0]);
 
   // Motion values controlled first by initial animation, then by scroll
   const lidRotation = useMotionValue(0);
