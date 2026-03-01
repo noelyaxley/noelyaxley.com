@@ -4,7 +4,7 @@ import { Linkedin, Instagram } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const iconClass =
-  "inline-flex items-center justify-center w-8 h-8 text-[#555] rounded-full cursor-pointer transition-all duration-200 hover:text-[#222] focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush";
+  "inline-flex items-center justify-center w-9 h-9 text-[#555] rounded-full cursor-pointer transition-all duration-200 hover:text-[#222] focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush";
 
 const iconStyle = {
   backgroundColor: "rgba(255,255,255,0.7)",
@@ -37,10 +37,12 @@ export function Navigation() {
       </motion.a>
 
       <motion.span
-        className="font-body text-muted text-sm sm:text-base font-light"
+        className="inline-flex items-center px-3.5 py-1.5 font-body text-muted text-sm sm:text-base font-light rounded-full"
         style={{
           letterSpacing: "-0.5px",
-          textShadow: "2px 2px 0 rgba(0,0,0,0.06)",
+          backgroundColor: "rgba(255,255,255,0.7)",
+          border: "1px solid #ddd",
+          backdropFilter: "blur(8px)",
         }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

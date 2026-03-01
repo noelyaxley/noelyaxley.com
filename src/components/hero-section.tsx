@@ -126,11 +126,11 @@ export function HeroSection() {
     <main className="relative min-h-screen flex flex-col items-center px-6 lg:px-10 pb-20">
       {/* Fixed Title — scrolls away with nav */}
       <motion.div
-        className="fixed top-16 left-0 right-0 z-30 text-center pointer-events-none"
+        className="fixed top-20 left-0 right-0 z-30 text-center pointer-events-none"
         style={{ y: titleY, opacity: titleOpacity }}
       >
         <motion.h1
-          className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black leading-none"
+          className="font-display text-[12.5vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black leading-none"
           style={{
             letterSpacing: "-0.04em",
             paddingLeft: 2,
@@ -149,7 +149,7 @@ export function HeroSection() {
       </motion.div>
 
       {/* Spacer to push content below fixed title + nav bar */}
-      <div className="pt-56 sm:pt-64 lg:pt-80" />
+      <div className="pt-64 sm:pt-72 lg:pt-88" />
 
       {/* Main content: Head + Ventures */}
       <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 lg:gap-1">
