@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HeadLayers } from "./head-layers";
 import { Squiggles } from "./squiggles";
 import { VentureCard } from "./venture-card";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  animate,
+} from "framer-motion";
 
 const VENTURES = [
   {
@@ -58,44 +64,107 @@ const VENTURES = [
 ];
 
 export function HeroSection() {
-  const [lidOpen, setLidOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const [scrollMode, setScrollMode] = useState(false);
+  const [cardsVisible, setCardsVisible] = useState(false);
+
+  // Scroll-mapped targets
+  const scrollLidRotation = useTransform(scrollY, [0, 400], [-45, 0]);
+  const scrollSquiggleOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+
+  // Title + nav: fixed at top, scroll away together
+  const titleY = useTransform(scrollY, [150, 350], [0, -60]);
+  const titleOpacity = useTransform(scrollY, [150, 350], [1, 0]);
+
+  // Motion values controlled first by initial animation, then by scroll
+  const lidRotation = useMotionValue(0);
+  const squiggleOpacity = useMotionValue(0);
+
+  // Phase 1: Initial entrance — lid springs open, then squiggles + cards appear
+  useEffect(() => {
+    const controls = animate(lidRotation, -45, {
+      delay: 1.3,
+      type: "spring",
+      mass: 1.5,
+      stiffness: 100,
+      damping: 12,
+    });
+
+    controls.then(() => {
+      setCardsVisible(true);
+      animate(squiggleOpacity, 1, { duration: 0.4 }).then(() => {
+        setScrollMode(true);
+      });
+    });
+
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Phase 2: Bind motion values to scroll position
+  useEffect(() => {
+    if (!scrollMode) return;
+
+    lidRotation.set(scrollLidRotation.get());
+    squiggleOpacity.set(scrollSquiggleOpacity.get());
+
+    const unsubLid = scrollLidRotation.on("change", (v) =>
+      lidRotation.set(v)
+    );
+    const unsubSquiggle = scrollSquiggleOpacity.on("change", (v) =>
+      squiggleOpacity.set(v)
+    );
+
+    return () => {
+      unsubLid();
+      unsubSquiggle();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollMode]);
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 lg:px-10 pt-14 pb-20">
-      {/* Title */}
-      <motion.h1
-        className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center w-full"
-        style={{
-          letterSpacing: "-0.04em",
-          paddingLeft: 2,
-          paddingRight: 2,
-          WebkitTextStroke: "6px white",
-          paintOrder: "stroke fill",
-          textShadow: "4px 4px 0 rgba(0,0,0,0.12), 2px 2px 0 rgba(0,0,0,0.08)",
-        }}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+    <main className="relative min-h-screen flex flex-col items-center px-6 lg:px-10 pb-20">
+      {/* Fixed Title + Tagline — scrolls away with nav */}
+      <motion.div
+        className="fixed top-14 left-0 right-0 z-30 text-center pointer-events-none"
+        style={{ y: titleY, opacity: titleOpacity }}
       >
-        Noel Yaxley
-      </motion.h1>
+        <motion.h1
+          className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none"
+          style={{
+            letterSpacing: "-0.04em",
+            paddingLeft: 2,
+            paddingRight: 2,
+            WebkitTextStroke: "6px white",
+            paintOrder: "stroke fill",
+            textShadow:
+              "4px 4px 0 rgba(0,0,0,0.12), 2px 2px 0 rgba(0,0,0,0.08)",
+          }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          Noel Yaxley
+        </motion.h1>
+        <motion.p
+          className="font-body text-muted text-lg sm:text-xl font-light"
+          style={{
+            letterSpacing: "-0.5px",
+            textShadow: "2px 2px 0 rgba(0,0,0,0.06)",
+          }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+        >
+          8 ventures. One builder.
+        </motion.p>
+      </motion.div>
 
-      {/* Tagline */}
-      <motion.p
-        className="font-body text-muted text-lg sm:text-xl font-light mb-24 lg:mb-32 text-center"
-        style={{
-          letterSpacing: "-0.5px",
-          textShadow: "2px 2px 0 rgba(0,0,0,0.06)",
-        }}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-      >
-        8 ventures. One builder.
-      </motion.p>
+      {/* Spacer to push content below fixed title */}
+      <div className="pt-48 sm:pt-56 lg:pt-72" />
 
       {/* Main content: Head + Ventures */}
-      <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-6 lg:gap-2">
+      <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 lg:gap-1">
         {/* Left: Head graphic + Squiggles — 65% width */}
         <motion.div
           className="relative flex-shrink-0 lg:w-[65%] flex justify-center overflow-visible"
@@ -109,19 +178,19 @@ export function HeroSection() {
           }}
         >
           <div className="relative">
-            <HeadLayers onLidOpen={() => setLidOpen(true)} />
-            <Squiggles visible={lidOpen} />
+            <HeadLayers lidRotation={lidRotation} />
+            <Squiggles opacity={squiggleOpacity} started={cardsVisible} />
           </div>
         </motion.div>
 
-        {/* Right: Venture cards — fixed width, generous right margin */}
+        {/* Right: Venture cards */}
         <div className="flex flex-col gap-3 w-full lg:w-[340px] lg:mr-[8%] flex-shrink-0">
           {VENTURES.map((venture, i) => (
             <VentureCard
               key={venture.name}
               {...venture}
               index={i}
-              visible={lidOpen}
+              visible={cardsVisible}
             />
           ))}
         </div>

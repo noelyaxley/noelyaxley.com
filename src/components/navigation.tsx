@@ -1,7 +1,7 @@
 "use client";
 
 import { Linkedin, Instagram } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const pillClass =
   "inline-flex items-center justify-center w-8 h-8 text-[#555] rounded-full cursor-pointer transition-all duration-200 hover:text-[#222] focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush";
@@ -13,8 +13,15 @@ const pillStyle = {
 };
 
 export function Navigation() {
+  const { scrollY } = useScroll();
+  const navOpacity = useTransform(scrollY, [150, 350], [1, 0]);
+  const navY = useTransform(scrollY, [150, 350], [0, -30]);
+
   return (
-    <nav className="fixed top-4 left-4 right-4 z-50 flex justify-between">
+    <motion.nav
+      className="fixed top-4 left-4 right-4 z-50 flex justify-between"
+      style={{ opacity: navOpacity, y: navY }}
+    >
       <motion.a
         href="https://instagram.com/noelyaxley"
         target="_blank"
@@ -42,6 +49,6 @@ export function Navigation() {
       >
         <Linkedin className="w-4 h-4" strokeWidth={2} />
       </motion.a>
-    </nav>
+    </motion.nav>
   );
 }
