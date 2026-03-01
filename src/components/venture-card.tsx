@@ -106,8 +106,7 @@ export function VentureCard({
         className="group flex items-center gap-3 p-2.5 w-full no-underline cursor-pointer rounded-[14px] transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush"
         style={{
           backgroundColor: "#FFFFFF",
-          border: `2px solid ${accent}`,
-          outline: "3px solid white",
+          border: `1.5px solid ${accent}`,
           boxShadow:
             "4px 4px 0 rgba(0,0,0,0.1), 2px 2px 0 rgba(0,0,0,0.06)",
           rotateX,
