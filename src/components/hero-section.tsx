@@ -77,8 +77,8 @@ export function HeroSection() {
   }, []);
 
   // Lid + squiggles: progress-based so they scale with page height
-  const scrollLidRotation = useTransform(scrollYProgress, [0, 0.6], [-45, 0]);
-  const scrollSquiggleOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const scrollLidRotation = useTransform(scrollYProgress, [0, isDesktop ? 0.6 : 0.25], [-45, 0]);
+  const scrollSquiggleOpacity = useTransform(scrollYProgress, [0, isDesktop ? 0.4 : 0.18], [1, 0]);
 
   // Title: responsive pixel thresholds (desktop has less scroll range)
   const titleStart = isDesktop ? 80 : 350;
