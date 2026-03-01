@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* DesignJoy-inspired warm palette */
+  --color-blush: #ECE6E8;
+  --color-blush-border: #DDCED3;
+  --color-blush-dashed: #E0D4D8;
+  --color-muted: #99948F;
+  --color-dark-surface: #1B1B1B;
+  --color-dark-top: #282727;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Accent pops — used sparingly */
+  --color-accent-yellow: #FFDB01;
+  --color-accent-blue: #097FFF;
+  --color-accent-orange: #FF5A00;
+  --color-accent-pink: #FF0084;
+
+  /* Fonts */
+  --font-body: var(--font-figtree);
+  --font-display: var(--font-archivo);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-blush);
+  color: #000000;
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
