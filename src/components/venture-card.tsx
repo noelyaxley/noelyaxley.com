@@ -1,10 +1,12 @@
 "use client";
 
+import { useRef } from "react";
 import {
   motion,
   useMotionValue,
   useTransform,
   useSpring,
+  useScroll,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -76,6 +78,14 @@ export function VentureCard({
   index,
   visible,
 }: VentureCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "center center"],
+  });
+  const scrollScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
+  const scrollOpacity = useTransform(scrollYProgress, [0, 0.3], [0.6, 1]);
+
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
 
@@ -98,7 +108,7 @@ export function VentureCard({
   const [accent, textColor] = BRAND_COLORS[index % BRAND_COLORS.length];
 
   return (
-    <div style={{ perspective: 800 }}>
+    <motion.div ref={cardRef} style={{ perspective: 800, scale: scrollScale, opacity: scrollOpacity }}>
       <motion.a
         href={url}
         target="_blank"
@@ -160,6 +170,6 @@ export function VentureCard({
           <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
         </div>
       </motion.a>
-    </div>
+    </motion.div>
   );
 }
