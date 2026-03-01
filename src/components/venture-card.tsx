@@ -108,7 +108,7 @@ export function VentureCard({
           backgroundColor: "#FFFFFF",
           border: `1.5px solid ${accent}`,
           boxShadow:
-            "0 2px 8px #00000010, 0 1px 2px #00000008",
+            "0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06)",
           rotateX,
           rotateY,
           transformStyle: "preserve-3d",
@@ -121,13 +121,13 @@ export function VentureCard({
         }
         transition={{
           type: "spring",
-          stiffness: 120,
-          damping: 14,
-          delay: index * 0.1,
+          stiffness: 160,
+          damping: 16,
+          delay: index * 0.06,
         }}
         whileHover={{
-          y: -2,
-          boxShadow: `0 8px 20px #00000015, 0 0 0 1px ${accent}`,
+          y: -3,
+          boxShadow: `0 12px 32px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08), 0 0 0 1px ${accent}`,
           transition: { duration: 0.2 },
         }}
         onMouseMove={handleMouseMove}

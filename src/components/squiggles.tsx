@@ -61,13 +61,13 @@ export function Squiggles({ visible }: SquigglesProps) {
             }
             transition={{
               pathLength: {
-                duration: 0.9,
-                delay: i * 0.08,
+                duration: 0.6,
+                delay: i * 0.05,
                 ease: "easeOut",
               },
               opacity: {
                 duration: 2.5,
-                delay: i * 0.08,
+                delay: i * 0.05,
                 repeat: Infinity,
                 repeatType: "reverse",
               },

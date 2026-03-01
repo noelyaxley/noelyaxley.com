@@ -65,7 +65,7 @@ export function HeroSection() {
       {/* Title */}
       <motion.h1
         className="font-display text-5xl sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center"
-        style={{ letterSpacing: "-0.04em" }}
+        style={{ letterSpacing: "-0.04em", textShadow: "0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)" }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -76,7 +76,7 @@ export function HeroSection() {
       {/* Tagline */}
       <motion.p
         className="font-body text-muted text-lg sm:text-xl font-light mb-14 lg:mb-20 text-center"
-        style={{ letterSpacing: "-0.5px" }}
+        style={{ letterSpacing: "-0.5px", textShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
