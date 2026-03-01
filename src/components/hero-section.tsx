@@ -64,10 +64,11 @@ export function HeroSection() {
     <main className="relative min-h-screen flex flex-col items-center justify-center px-6 lg:px-10 pt-14 pb-20">
       {/* Title */}
       <motion.h1
-        className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center"
+        className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center w-full"
         style={{
           letterSpacing: "-0.04em",
-          padding: "0 1px",
+          paddingLeft: 2,
+          paddingRight: 2,
           WebkitTextStroke: "6px white",
           paintOrder: "stroke fill",
           textShadow: "4px 4px 0 rgba(0,0,0,0.12), 2px 2px 0 rgba(0,0,0,0.08)",
@@ -81,7 +82,7 @@ export function HeroSection() {
 
       {/* Tagline */}
       <motion.p
-        className="font-body text-muted text-lg sm:text-xl font-light mb-20 lg:mb-28 text-center"
+        className="font-body text-muted text-lg sm:text-xl font-light mb-24 lg:mb-32 text-center"
         style={{
           letterSpacing: "-0.5px",
           textShadow: "2px 2px 0 rgba(0,0,0,0.06)",

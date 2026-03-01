@@ -32,7 +32,7 @@ export function Squiggles({ visible }: SquigglesProps) {
   return (
     <div
       className="absolute pointer-events-none z-20"
-      style={{ top: "0%", left: "50%" }}
+      style={{ top: "-15%", left: "50%" }}
     >
       <svg
         width="300"

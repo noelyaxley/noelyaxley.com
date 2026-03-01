@@ -4,7 +4,7 @@ import { Linkedin, Instagram } from "lucide-react";
 import { motion } from "framer-motion";
 
 const pillClass =
-  "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[#555] text-[12px] font-semibold rounded-md cursor-pointer transition-all duration-200 hover:text-[#222] focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush";
+  "inline-flex items-center justify-center w-8 h-8 text-[#555] rounded-full cursor-pointer transition-all duration-200 hover:text-[#222] focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush";
 
 const pillStyle = {
   backgroundColor: "rgba(255,255,255,0.7)",
@@ -26,8 +26,7 @@ export function Navigation() {
         transition={{ delay: 0.3, duration: 0.4 }}
         whileHover={{ y: -1, transition: { duration: 0.2 } }}
       >
-        <Instagram className="w-3.5 h-3.5" strokeWidth={2} />
-        EDU
+        <Instagram className="w-4 h-4" strokeWidth={2} />
       </motion.a>
 
       <motion.a
@@ -41,8 +40,7 @@ export function Navigation() {
         transition={{ delay: 0.3, duration: 0.4 }}
         whileHover={{ y: -1, transition: { duration: 0.2 } }}
       >
-        <Linkedin className="w-3.5 h-3.5" strokeWidth={2} />
-        CV
+        <Linkedin className="w-4 h-4" strokeWidth={2} />
       </motion.a>
     </nav>
   );
