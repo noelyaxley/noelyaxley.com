@@ -75,7 +75,7 @@ export function HeroSection() {
 
       {/* Tagline */}
       <motion.p
-        className="font-body text-muted text-lg sm:text-xl font-light mb-14 lg:mb-20 text-center"
+        className="font-body text-muted text-lg sm:text-xl font-light mb-20 lg:mb-28 text-center"
         style={{ letterSpacing: "-0.5px", textShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
