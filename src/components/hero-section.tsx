@@ -124,13 +124,13 @@ export function HeroSection() {
 
   return (
     <main className="relative min-h-screen flex flex-col items-center px-6 lg:px-10 pb-20">
-      {/* Fixed Title + Tagline — scrolls away with nav */}
+      {/* Fixed Title — scrolls away with nav */}
       <motion.div
-        className="fixed top-14 left-0 right-0 z-30 text-center pointer-events-none"
+        className="fixed top-16 left-0 right-0 z-30 text-center pointer-events-none"
         style={{ y: titleY, opacity: titleOpacity }}
       >
         <motion.h1
-          className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none"
+          className="font-display text-[11vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black leading-none"
           style={{
             letterSpacing: "-0.04em",
             paddingLeft: 2,
@@ -146,22 +146,10 @@ export function HeroSection() {
         >
           Noel Yaxley
         </motion.h1>
-        <motion.p
-          className="font-body text-muted text-lg sm:text-xl font-light"
-          style={{
-            letterSpacing: "-0.5px",
-            textShadow: "2px 2px 0 rgba(0,0,0,0.06)",
-          }}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-        >
-          8 ventures. One builder.
-        </motion.p>
       </motion.div>
 
-      {/* Spacer to push content below fixed title */}
-      <div className="pt-48 sm:pt-56 lg:pt-72" />
+      {/* Spacer to push content below fixed title + nav bar */}
+      <div className="pt-56 sm:pt-64 lg:pt-80" />
 
       {/* Main content: Head + Ventures */}
       <div className="w-full flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 lg:gap-1">
