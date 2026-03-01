@@ -81,8 +81,8 @@ export function HeroSection() {
   const scrollSquiggleOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
 
   // Title: responsive pixel thresholds (desktop has less scroll range)
-  const titleStart = isDesktop ? 80 : 450;
-  const titleEnd = isDesktop ? 220 : 650;
+  const titleStart = isDesktop ? 80 : 350;
+  const titleEnd = isDesktop ? 220 : 550;
   const titleY = useTransform(scrollY, [titleStart, titleEnd], [0, -60]);
   const titleOpacity = useTransform(scrollY, [titleStart, titleEnd], [1, 0]);
 

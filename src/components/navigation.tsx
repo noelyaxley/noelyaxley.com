@@ -24,8 +24,8 @@ export function Navigation() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const navStart = isDesktop ? 80 : 450;
-  const navEnd = isDesktop ? 220 : 650;
+  const navStart = isDesktop ? 80 : 350;
+  const navEnd = isDesktop ? 220 : 550;
   const navOpacity = useTransform(scrollY, [navStart, navEnd], [1, 0]);
   const navY = useTransform(scrollY, [navStart, navEnd], [0, -30]);
 
