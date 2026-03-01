@@ -64,7 +64,7 @@ export function HeroSection() {
     <main className="relative min-h-screen flex flex-col items-center justify-center px-6 lg:px-10 pt-14 pb-20">
       {/* Title */}
       <motion.h1
-        className="font-display text-5xl sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center"
+        className="font-display text-[13vw] sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center px-1 sm:px-0"
         style={{ letterSpacing: "-0.04em", textShadow: "0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)" }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
