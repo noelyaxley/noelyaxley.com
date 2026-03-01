@@ -61,7 +61,7 @@ export function HeroSection() {
   const [lidOpen, setLidOpen] = useState(false);
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 lg:px-10 pt-28 pb-20">
+    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 lg:px-10 pt-14 pb-20">
       {/* Title */}
       <motion.h1
         className="font-display text-5xl sm:text-7xl lg:text-[8rem] xl:text-[10rem] font-black italic uppercase text-black mb-4 leading-none text-center"
