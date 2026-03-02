@@ -11,7 +11,7 @@ export function HeadLayers({ lidRotation }: HeadLayersProps) {
     <div className="relative w-[312px] sm:w-[384px] lg:w-[480px] pb-6 overflow-visible">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/head-bottom.png"
+        src="/head-bottom.webp"
         alt="Noel Yaxley"
         className="w-full h-auto block"
         draggable={false}
@@ -23,7 +23,7 @@ export function HeadLayers({ lidRotation }: HeadLayersProps) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/head-top.png"
+          src="/head-top.webp"
           alt=""
           className="w-full h-auto block"
           draggable={false}
