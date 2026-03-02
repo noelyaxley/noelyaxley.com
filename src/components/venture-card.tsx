@@ -109,6 +109,8 @@ export function VentureCard({
   useEffect(() => {
     if (!visible || !headOrigin || !thumbRef.current) return;
 
+    let cancelled = false;
+
     const rect = thumbRef.current.getBoundingClientRect();
     const dx = headOrigin.x - (rect.left + rect.width / 2);
     const dy = headOrigin.y - (rect.top + rect.height / 2);
@@ -137,14 +139,23 @@ export function VentureCard({
           rotate: { type: "spring", stiffness: 120, damping: 18, delay },
         },
       })
-      .then(() => setLanded(true));
-  }, [visible, headOrigin, index, thumbControls]);
+      .then(() => {
+        if (!cancelled) setLanded(true);
+      });
+
+    return () => {
+      cancelled = true;
+      thumbControls.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, headOrigin, index]);
 
   const [accent, textColor] = BRAND_COLORS[index % BRAND_COLORS.length];
 
   return (
     <motion.div
       ref={cardRef}
+      className="relative"
       style={{ perspective: 800, scale: scrollScale, opacity: scrollOpacity }}
     >
       <motion.a
