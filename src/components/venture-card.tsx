@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   motion,
   useMotionValue,
   useTransform,
   useSpring,
   useScroll,
+  useAnimationControls,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -14,9 +15,11 @@ interface VentureCardProps {
   name: string;
   tagline: string;
   url: string;
-  screenshot: string;
+  screenshot?: string;
   index: number;
   visible: boolean;
+  headOrigin?: { x: number; y: number } | null;
+  scrollMode: boolean;
 }
 
 // Per-venture brand colors: [accent (border/thumbnail), text (readable on white)]
@@ -31,44 +34,26 @@ const BRAND_COLORS: [string, string][] = [
   ["#F9C800", "#A68500"], // Future Scan — yellow
 ];
 
-// Live iframe thumbnail: renders the real site at 1200×1600 (3:4) then
-// scales it down to fit a 48×64 box. pointer-events-none prevents interaction.
-const IFRAME_W = 1200;
-const IFRAME_H = 1600;
 const THUMB_W = 48;
 const THUMB_H = 64;
-const SCALE = THUMB_W / IFRAME_W; // 0.04
 
-function SiteThumbnail({ url, name, accent }: { url: string; name: string; accent: string }) {
+function SiteThumbnail({ screenshot, name, accent }: { screenshot?: string; name: string; accent: string }) {
   return (
     <div
       className="relative flex-shrink-0 rounded-lg overflow-hidden"
-      style={{
-        width: THUMB_W,
-        height: THUMB_H,
-        backgroundColor: accent,
-      }}
+      style={{ width: THUMB_W, height: THUMB_H, backgroundColor: accent }}
     >
-      {/* Fallback letter — visible while iframe loads */}
-      <span className="absolute inset-0 flex items-center justify-center font-body font-semibold text-white text-sm select-none z-0">
-        {name[0]}
-      </span>
-      <iframe
-        src={url}
-        title={`${name} preview`}
-        loading="lazy"
-        tabIndex={-1}
-        sandbox="allow-scripts allow-same-origin"
-        className="absolute top-0 left-0 pointer-events-none border-0 z-10"
-        style={{
-          width: IFRAME_W,
-          height: IFRAME_H,
-          transform: `scale(${SCALE})`,
-          transformOrigin: "top left",
-        }}
-      />
-      {/* Transparent overlay to block any iframe touch/click leaks on mobile */}
-      <div className="absolute inset-0 z-20" />
+      {screenshot ? (
+        <img
+          src={screenshot}
+          alt={`${name} preview`}
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center font-body font-semibold text-white text-sm select-none">
+          {name[0]}
+        </span>
+      )}
     </div>
   );
 }
@@ -80,98 +65,169 @@ export function VentureCard({
   screenshot,
   index,
   visible,
+  headOrigin,
+  scrollMode,
 }: VentureCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const thumbControls = useAnimationControls();
+  const [landed, setLanded] = useState(false);
+
+  // Scroll-linked scale/opacity
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ["start end", "center center"],
   });
-  const scrollScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
-  const scrollOpacity = useTransform(scrollYProgress, [0, 0.3], [0.6, 1]);
+  const rawScrollScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
+  const rawScrollOpacity = useTransform(scrollYProgress, [0, 0.3], [0.6, 1]);
 
-  const x = useMotionValue(0.5);
-  const y = useMotionValue(0.5);
+  // Gate scroll effects behind scrollMode + landed
+  const applyScroll = scrollMode && landed;
+  const scrollScale = useTransform(rawScrollScale, (v) => (applyScroll ? v : 1));
+  const scrollOpacity = useTransform(rawScrollOpacity, (v) => (applyScroll ? v : 1));
 
-  const rawRotateX = useTransform(y, [0, 1], [6, -6]);
-  const rawRotateY = useTransform(x, [0, 1], [-6, 6]);
+  // Mouse tilt
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rawRotateX = useTransform(my, [0, 1], [6, -6]);
+  const rawRotateY = useTransform(mx, [0, 1], [-6, 6]);
   const rotateX = useSpring(rawRotateX, { stiffness: 300, damping: 30 });
   const rotateY = useSpring(rawRotateY, { stiffness: 300, damping: 30 });
 
   function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width);
-    y.set((e.clientY - rect.top) / rect.height);
+    mx.set((e.clientX - rect.left) / rect.width);
+    my.set((e.clientY - rect.top) / rect.height);
   }
 
   function handleMouseLeave() {
-    x.set(0.5);
-    y.set(0.5);
+    mx.set(0.5);
+    my.set(0.5);
   }
+
+  // Thumbnail fly-from-head animation
+  useEffect(() => {
+    if (!visible || !headOrigin || !thumbRef.current) return;
+
+    const rect = thumbRef.current.getBoundingClientRect();
+    const dx = headOrigin.x - (rect.left + rect.width / 2);
+    const dy = headOrigin.y - (rect.top + rect.height / 2);
+
+    // Instantly position at the head opening, small and rotated
+    thumbControls.set({
+      x: dx,
+      y: dy,
+      scale: 0.5,
+      rotate: (index % 2 === 0 ? 1 : -1) * (10 + index * 3),
+    });
+
+    // Spring to natural card position — different stiffness for x/y creates an arc
+    const delay = index * 0.1;
+    thumbControls
+      .start({
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotate: 0,
+        transition: {
+          x: { type: "spring", stiffness: 70, damping: 14, delay },
+          y: { type: "spring", stiffness: 45, damping: 12, delay },
+          scale: { type: "spring", stiffness: 100, damping: 15, delay },
+          rotate: { type: "spring", stiffness: 120, damping: 18, delay },
+        },
+      })
+      .then(() => setLanded(true));
+  }, [visible, headOrigin, index, thumbControls]);
 
   const [accent, textColor] = BRAND_COLORS[index % BRAND_COLORS.length];
 
   return (
-    <motion.div ref={cardRef} style={{ perspective: 800, scale: scrollScale, opacity: scrollOpacity }}>
+    <motion.div
+      ref={cardRef}
+      style={{ perspective: 800, scale: scrollScale, opacity: scrollOpacity }}
+    >
       <motion.a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-3 p-2.5 w-full no-underline cursor-pointer rounded-[14px] transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush"
+        className="group flex items-center gap-3 p-2.5 w-full no-underline cursor-pointer rounded-[14px] border-[1.5px] border-solid border-transparent focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush"
         style={{
-          backgroundColor: "#FFFFFF",
-          border: `1.5px solid ${accent}`,
-          boxShadow:
-            "4px 4px 0 rgba(0,0,0,0.1), 2px 2px 0 rgba(0,0,0,0.06)",
           rotateX,
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        initial={{ x: -300, opacity: 0, scale: 0.85 }}
-        animate={
-          visible
-            ? { x: 0, opacity: 1, scale: 1 }
-            : { x: -300, opacity: 0, scale: 0.85 }
+        initial={{
+          backgroundColor: "rgba(255,255,255,0)",
+          borderColor: "rgba(0,0,0,0)",
+          boxShadow: "0 0 0 rgba(0,0,0,0)",
+        }}
+        animate={{
+          backgroundColor: landed ? "#FFFFFF" : "rgba(255,255,255,0)",
+          borderColor: landed ? accent : "rgba(0,0,0,0)",
+          boxShadow: landed
+            ? "4px 4px 0 rgba(0,0,0,0.1), 2px 2px 0 rgba(0,0,0,0.06)"
+            : "0 0 0 rgba(0,0,0,0)",
+        }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        whileHover={
+          landed
+            ? {
+                y: -3,
+                boxShadow:
+                  "6px 8px 0 rgba(0,0,0,0.12), 3px 4px 0 rgba(0,0,0,0.08)",
+                transition: { duration: 0.2 },
+              }
+            : undefined
         }
-        transition={{
-          type: "spring",
-          stiffness: 160,
-          damping: 16,
-          delay: index * 0.06,
-        }}
-        whileHover={{
-          y: -3,
-          boxShadow: "6px 8px 0 rgba(0,0,0,0.12), 3px 4px 0 rgba(0,0,0,0.08)",
-          transition: { duration: 0.2 },
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseMove={landed ? handleMouseMove : undefined}
+        onMouseLeave={landed ? handleMouseLeave : undefined}
       >
-        {/* Live site thumbnail — 3:4 ratio */}
-        <SiteThumbnail url={url} name={name} accent={accent} />
+        {/* Thumbnail — flies from head opening to card position */}
+        <motion.div
+          ref={thumbRef}
+          animate={thumbControls}
+          className="flex-shrink-0 relative z-10"
+        >
+          <SiteThumbnail screenshot={screenshot} name={name} accent={accent} />
+        </motion.div>
 
-        {/* Name + Tagline + URL — bold, colored, 15% size steps */}
-        <div className="flex-1 min-w-0">
+        {/* Card content — fades in after thumbnail lands */}
+        <motion.div
+          className="flex-1 min-w-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: landed ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <h3
             className="font-body font-bold text-base leading-tight truncate"
             style={{ letterSpacing: "-0.3px", color: textColor }}
           >
             {name}
           </h3>
-          <p className="font-body font-bold text-[14px] truncate mt-0.5" style={{ color: textColor, opacity: 0.8 }}>
+          <p
+            className="font-body font-bold text-[14px] truncate mt-0.5"
+            style={{ color: textColor, opacity: 0.8 }}
+          >
             {tagline}
           </p>
-          <p className="font-body font-bold text-[12px] truncate mt-0.5" style={{ color: textColor, opacity: 0.6 }}>
+          <p
+            className="font-body font-bold text-[12px] truncate mt-0.5"
+            style={{ color: textColor, opacity: 0.6 }}
+          >
             {url.replace(/^https?:\/\//, "")}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Arrow — accent colored */}
-        <div
+        {/* Arrow — fades in after thumbnail lands */}
+        <motion.div
           className="w-7 h-7 flex-shrink-0 rounded-md border flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
           style={{ borderColor: accent, color: accent }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: landed ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
         >
           <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
-        </div>
+        </motion.div>
       </motion.a>
     </motion.div>
   );

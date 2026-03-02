@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HeadLayers } from "./head-layers";
 import { Squiggles } from "./squiggles";
 import { VentureCard } from "./venture-card";
@@ -29,7 +29,6 @@ const VENTURES = [
     name: "Yaxley Studio",
     tagline: "Architecture Office",
     url: "https://yaxleystudio.com.au",
-    screenshot: "/screenshots/yaxleystudio.png",
   },
   {
     name: "Turnz",
@@ -47,19 +46,16 @@ const VENTURES = [
     name: "Fabulr",
     tagline: "Home Prefabrication",
     url: "https://fabulr.com.au",
-    screenshot: "/screenshots/fabulr.png",
   },
   {
     name: "Fynx",
     tagline: "Construction Finance",
     url: "https://fynx.com.au",
-    screenshot: "/screenshots/fynx.png",
   },
   {
     name: "Future Scan",
     tagline: "Preventative MRI",
     url: "https://futurescan.com.au",
-    screenshot: "/screenshots/futurescan.png",
   },
 ];
 
@@ -68,6 +64,8 @@ export function HeroSection() {
   const [scrollMode, setScrollMode] = useState(false);
   const [cardsVisible, setCardsVisible] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const headRef = useRef<HTMLDivElement>(null);
+  const [headOrigin, setHeadOrigin] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 1024);
@@ -101,6 +99,14 @@ export function HeroSection() {
     });
 
     controls.then(() => {
+      // Measure head position for thumbnail emission point
+      if (headRef.current) {
+        const rect = headRef.current.getBoundingClientRect();
+        setHeadOrigin({
+          x: rect.left + rect.width * 0.55,
+          y: rect.top + rect.height * 0.15,
+        });
+      }
       setCardsVisible(true);
       animate(squiggleOpacity, 1, { duration: 0.4 }).then(() => {
         setScrollMode(true);
@@ -176,7 +182,9 @@ export function HeroSection() {
           }}
         >
           <div className="relative">
-            <HeadLayers lidRotation={lidRotation} />
+            <div ref={headRef}>
+              <HeadLayers lidRotation={lidRotation} />
+            </div>
             <Squiggles opacity={squiggleOpacity} started={cardsVisible} />
           </div>
         </motion.div>
@@ -189,6 +197,8 @@ export function HeroSection() {
               {...venture}
               index={i}
               visible={cardsVisible}
+              headOrigin={headOrigin}
+              scrollMode={scrollMode}
             />
           ))}
         </div>
