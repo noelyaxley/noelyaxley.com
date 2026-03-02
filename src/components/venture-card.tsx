@@ -113,12 +113,13 @@ export function VentureCard({
     const dx = headOrigin.x - (rect.left + rect.width / 2);
     const dy = headOrigin.y - (rect.top + rect.height / 2);
 
-    // Instantly position at the head opening, small and rotated
+    // Instantly position at the head opening, small and rotated, then reveal
     thumbControls.set({
       x: dx,
       y: dy,
       scale: 0.5,
       rotate: (index % 2 === 0 ? 1 : -1) * (10 + index * 3),
+      opacity: 1,
     });
 
     // Spring to natural card position — different stiffness for x/y creates an arc
@@ -182,9 +183,10 @@ export function VentureCard({
         onMouseMove={landed ? handleMouseMove : undefined}
         onMouseLeave={landed ? handleMouseLeave : undefined}
       >
-        {/* Thumbnail — flies from head opening to card position */}
+        {/* Thumbnail — starts hidden, flies from head opening to card position */}
         <motion.div
           ref={thumbRef}
+          initial={{ opacity: 0 }}
           animate={thumbControls}
           className="flex-shrink-0 relative z-10"
         >
