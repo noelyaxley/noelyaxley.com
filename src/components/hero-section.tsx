@@ -29,6 +29,7 @@ const VENTURES = [
     name: "Yaxley Studio",
     tagline: "Architecture Office",
     url: "https://yaxleystudio.com.au",
+    screenshot: "/screenshots/yaxleystudio.png",
   },
   {
     name: "Turnz",
@@ -46,16 +47,19 @@ const VENTURES = [
     name: "Fabulr",
     tagline: "Home Prefabrication",
     url: "https://fabulr.com.au",
+    screenshot: "/screenshots/fabulr.png",
   },
   {
     name: "Fynx",
     tagline: "Construction Finance",
     url: "https://fynx.com.au",
+    screenshot: "/screenshots/fynx.png",
   },
   {
     name: "Future Scan",
     tagline: "Preventative MRI",
     url: "https://futurescan.com.au",
+    screenshot: "/screenshots/futurescan.png",
   },
 ];
 
