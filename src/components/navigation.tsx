@@ -35,7 +35,7 @@ export function Navigation() {
       style={{ opacity: navOpacity, y: navY }}
     >
       <motion.a
-        href="https://instagram.com/noelyaxley"
+        href="https://www.instagram.com/nyaxley"
         target="_blank"
         rel="noopener noreferrer"
         className={iconClass}
