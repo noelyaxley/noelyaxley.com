@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Full-resolution portrait source art; the site ships the .webp cut-outs in public/.
+
+/Head-*.png
