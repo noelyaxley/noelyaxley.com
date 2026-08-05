@@ -26,6 +26,21 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+/* Keyboard focus: a real outline, so no inline box-shadow can overwrite it */
+/* No border-radius here: this rule sits outside @layer, so it would beat
+   Tailwind's layered rounded-* utilities and square off the pill CTA and the
+   circular nav icons on keyboard focus. The outline follows each element's
+   own radius instead. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 3px;
+}
+
+footer a:focus-visible {
+  outline-color: #FFFFFF;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type MotionValue } from "framer-motion";
+import { motion, useReducedMotion, type MotionValue } from "framer-motion";
 
 const SQUIGGLES = [
   { d: "M 0,0 C 20,-5 40,-22 65,-38 C 85,-48 95,-32 120,-58 C 140,-68 155,-52 185,-80 C 205,-90 215,-75 245,-105", color: "#FF8C00" },
@@ -19,6 +19,8 @@ interface SquigglesProps {
 }
 
 export function Squiggles({ opacity, started }: SquigglesProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
       className="absolute pointer-events-none z-20"
@@ -42,23 +44,29 @@ export function Squiggles({ opacity, started }: SquigglesProps) {
             fill="none"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={
-              started
-                ? { pathLength: 1, opacity: [0, 1, 1, 0.5] }
-                : {}
+              reduceMotion
+                ? { pathLength: 1, opacity: 1 }
+                : started
+                  ? { pathLength: 1, opacity: [0, 1, 1, 0.5] }
+                  : {}
             }
-            transition={{
-              pathLength: {
-                duration: 0.6,
-                delay: i * 0.05,
-                ease: "easeOut",
-              },
-              opacity: {
-                duration: 2.5,
-                delay: i * 0.05,
-                repeat: Infinity,
-                repeatType: "reverse",
-              },
-            }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : {
+                    pathLength: {
+                      duration: 0.6,
+                      delay: i * 0.05,
+                      ease: "easeOut",
+                    },
+                    opacity: {
+                      duration: 2.5,
+                      delay: i * 0.05,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                    },
+                  }
+            }
           />
         ))}
       </svg>

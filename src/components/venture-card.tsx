@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import {
   motion,
   useMotionValue,
   useTransform,
   useSpring,
-  useScroll,
+  useReducedMotion,
   useAnimationControls,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
@@ -19,20 +19,24 @@ interface VentureCardProps {
   index: number;
   visible: boolean;
   headOrigin?: { x: number; y: number } | null;
-  scrollMode: boolean;
 }
 
-// Per-venture brand colors: [accent (border/thumbnail), text (readable on white)]
-const BRAND_COLORS: [string, string][] = [
-  ["#FF8C00", "#D27400"], // UpScale PM — orange
-  ["#E65C00", "#B84A00"], // UpScale.build — deeper orange
-  ["#333333", "#1A1A1A"], // Yaxley Studio — black
-  ["#2196F3", "#1976D2"], // Turnz — blue
-  ["#4CAF50", "#2E7D32"], // Age Lab — green
-  ["#A0522D", "#7A3E22"], // Fabulr — brown
-  ["#E53935", "#C62828"], // Fynx — red
-  ["#F9C800", "#A68500"], // Future Scan — yellow
+// Per-venture accent — border, thumbnail backing and arrow only. Never text.
+const BRAND_COLORS: string[] = [
+  "#FF8C00", // UpScale PM — orange
+  "#E65C00", // UpScale.build — deeper orange
+  "#333333", // Yaxley Studio — black
+  "#2196F3", // Turnz — blue
+  "#4CAF50", // Age Lab — green
+  "#A0522D", // Fabulr — brown
+  "#E53935", // Fynx — red
+  "#F9C800", // Future Scan — yellow
 ];
+
+// Text sits in near-black on white so every card reads at the same strength.
+const TITLE_COLOR = "#111111";
+const TAGLINE_COLOR = "#3F3A37";
+const URL_COLOR = "#615A56";
 
 const THUMB_W = 48;
 const THUMB_H = 64;
@@ -66,25 +70,10 @@ export function VentureCard({
   index,
   visible,
   headOrigin,
-  scrollMode,
 }: VentureCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const thumbControls = useAnimationControls();
-  const [landed, setLanded] = useState(false);
-
-  // Scroll-linked scale/opacity
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ["start end", "center center"],
-  });
-  const rawScrollScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
-  const rawScrollOpacity = useTransform(scrollYProgress, [0, 0.3], [0.6, 1]);
-
-  // Gate scroll effects behind scrollMode + landed
-  const applyScroll = scrollMode && landed;
-  const scrollScale = useTransform(rawScrollScale, (v) => (applyScroll ? v : 1));
-  const scrollOpacity = useTransform(rawScrollOpacity, (v) => (applyScroll ? v : 1));
+  const reduceMotion = useReducedMotion();
 
   // Mouse tilt
   const mx = useMotionValue(0.5);
@@ -95,6 +84,7 @@ export function VentureCard({
   const rotateY = useSpring(rawRotateY, { stiffness: 300, damping: 30 });
 
   function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (reduceMotion) return;
     const rect = e.currentTarget.getBoundingClientRect();
     mx.set((e.clientX - rect.left) / rect.width);
     my.set((e.clientY - rect.top) / rect.height);
@@ -105,11 +95,14 @@ export function VentureCard({
     my.set(0.5);
   }
 
-  // Thumbnail fly-from-head animation
-  useEffect(() => {
-    if (!visible || !headOrigin || !thumbRef.current) return;
+  // Reduced motion, or no measured origin to fly from: the thumbnail just sits
+  // in place. Declarative, so it paints without waiting on the animation loop.
+  const restingThumb = reduceMotion || (visible && !headOrigin);
 
-    let cancelled = false;
+  // Thumbnail fly-from-head animation — the only thing the entrance gates.
+  useEffect(() => {
+    if (!visible || reduceMotion) return;
+    if (!headOrigin || !thumbRef.current) return;
 
     const rect = thumbRef.current.getBoundingClientRect();
     const dx = headOrigin.x - (rect.left + rect.width / 2);
@@ -125,122 +118,108 @@ export function VentureCard({
     });
 
     // Spring to natural card position — different stiffness for x/y creates an arc
-    const delay = index * 0.1;
-    thumbControls
-      .start({
-        x: 0,
-        y: 0,
-        scale: 1,
-        rotate: 0,
-        transition: {
-          x: { type: "spring", stiffness: 70, damping: 14, delay },
-          y: { type: "spring", stiffness: 45, damping: 12, delay },
-          scale: { type: "spring", stiffness: 100, damping: 15, delay },
-          rotate: { type: "spring", stiffness: 120, damping: 18, delay },
-        },
-      })
-      .then(() => {
-        if (!cancelled) setLanded(true);
-      });
+    const delay = index * 0.08;
+    thumbControls.start({
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotate: 0,
+      transition: {
+        x: { type: "spring", stiffness: 70, damping: 14, delay },
+        y: { type: "spring", stiffness: 45, damping: 12, delay },
+        scale: { type: "spring", stiffness: 100, damping: 15, delay },
+        rotate: { type: "spring", stiffness: 120, damping: 18, delay },
+      },
+    });
 
     return () => {
-      cancelled = true;
       thumbControls.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, headOrigin, index]);
+  }, [visible, headOrigin, index, reduceMotion]);
 
-  const [accent, textColor] = BRAND_COLORS[index % BRAND_COLORS.length];
+  const accent = BRAND_COLORS[index % BRAND_COLORS.length];
 
   return (
     <motion.div
-      ref={cardRef}
       className="relative"
-      style={{ perspective: 800, scale: scrollScale, opacity: scrollOpacity }}
+      style={{ perspective: 800 }}
+      // Card content is legible from first paint; the reveal only settles it.
+      initial={{ y: 10 }}
+      whileInView={{ y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={
+        reduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+      }
     >
       <motion.a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-3 p-2.5 w-full no-underline cursor-pointer rounded-[14px] border-[1.5px] border-solid border-transparent focus:outline-none focus:ring-2 focus:ring-black/10 focus:ring-offset-2 focus:ring-offset-blush"
+        className="group flex items-center gap-3 p-2.5 w-full no-underline cursor-pointer rounded-[14px] border-[1.5px] border-solid"
         style={{
           rotateX,
           rotateY,
           transformStyle: "preserve-3d",
+          backgroundColor: "#FFFFFF",
+          borderColor: accent,
+          boxShadow: "4px 4px 0 rgba(0,0,0,0.1), 2px 2px 0 rgba(0,0,0,0.06)",
         }}
-        initial={{
-          backgroundColor: "rgba(255,255,255,0)",
-          borderColor: "rgba(0,0,0,0)",
-          boxShadow: "0 0 0 rgba(0,0,0,0)",
-        }}
-        animate={{
-          backgroundColor: landed ? "#FFFFFF" : "rgba(255,255,255,0)",
-          borderColor: landed ? accent : "rgba(0,0,0,0)",
-          boxShadow: landed
-            ? "4px 4px 0 rgba(0,0,0,0.1), 2px 2px 0 rgba(0,0,0,0.06)"
-            : "0 0 0 rgba(0,0,0,0)",
-        }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
         whileHover={
-          landed
-            ? {
+          reduceMotion
+            ? undefined
+            : {
                 y: -3,
                 boxShadow:
                   "6px 8px 0 rgba(0,0,0,0.12), 3px 4px 0 rgba(0,0,0,0.08)",
                 transition: { duration: 0.2 },
               }
-            : undefined
         }
-        onMouseMove={landed ? handleMouseMove : undefined}
-        onMouseLeave={landed ? handleMouseLeave : undefined}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
-        {/* Thumbnail — starts hidden, flies from head opening to card position */}
+        {/* Thumbnail — flies from the head opening once the lid is up */}
         <motion.div
           ref={thumbRef}
           initial={{ opacity: 0 }}
-          animate={thumbControls}
+          animate={
+            restingThumb
+              ? { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }
+              : thumbControls
+          }
+          transition={restingThumb ? { duration: 0 } : undefined}
           className="flex-shrink-0 relative z-10"
         >
           <SiteThumbnail screenshot={screenshot} name={name} accent={accent} />
         </motion.div>
 
-        {/* Card content — fades in after thumbnail lands */}
-        <motion.div
-          className="flex-1 min-w-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: landed ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="flex-1 min-w-0">
           <h3
             className="font-body font-bold text-base leading-tight truncate"
-            style={{ letterSpacing: "-0.3px", color: textColor }}
+            style={{ letterSpacing: "-0.3px", color: TITLE_COLOR }}
           >
             {name}
           </h3>
           <p
             className="font-body font-bold text-[14px] truncate mt-0.5"
-            style={{ color: textColor, opacity: 0.8 }}
+            style={{ color: TAGLINE_COLOR }}
           >
             {tagline}
           </p>
           <p
             className="font-body font-bold text-[12px] truncate mt-0.5"
-            style={{ color: textColor, opacity: 0.6 }}
+            style={{ color: URL_COLOR }}
           >
             {url.replace(/^https?:\/\//, "")}
           </p>
-        </motion.div>
+        </div>
 
-        {/* Arrow — fades in after thumbnail lands */}
-        <motion.div
+        <div
           className="w-7 h-7 flex-shrink-0 rounded-md border flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
           style={{ borderColor: accent, color: accent }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: landed ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
         >
           <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
-        </motion.div>
+        </div>
       </motion.a>
     </motion.div>
   );
