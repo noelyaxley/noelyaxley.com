@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
-import { Figtree, Archivo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const figtree = Figtree({
+const figtree = localFont({
+  src: "./fonts/figtree-latin-wght-normal.woff2",
   variable: "--font-figtree",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: "300 700",
+  style: "normal",
+  display: "swap",
 });
 
 // Archivo kept only for the hero name — one decorative moment
-const archivo = Archivo({
+const archivo = localFont({
+  src: [
+    {
+      path: "./fonts/archivo-latin-wght-normal.woff2",
+      weight: "700 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/archivo-latin-wght-italic.woff2",
+      weight: "700 900",
+      style: "italic",
+    },
+  ],
   variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
-  style: ["normal", "italic"],
+  display: "swap",
 });
 
 const siteUrl = "https://noelyaxley.com";
