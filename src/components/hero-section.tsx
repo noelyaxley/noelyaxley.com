@@ -104,13 +104,14 @@ export function HeroSection() {
     if (reduceMotion) {
       lidRotation.set(-45);
       squiggleOpacity.set(1);
-      setCardsVisible(true);
       return;
     }
 
+    let cancelled = false;
     let revealed = false;
+    let squiggleAnimation: ReturnType<typeof animate> | undefined;
     const reveal = () => {
-      if (revealed) return;
+      if (revealed || cancelled) return;
       revealed = true;
 
       // Measure head position for thumbnail emission point
@@ -122,8 +123,9 @@ export function HeroSection() {
         });
       }
       setCardsVisible(true);
-      animate(squiggleOpacity, 1, { duration: 0.4 }).then(() => {
-        setScrollMode(true);
+      squiggleAnimation = animate(squiggleOpacity, 1, { duration: 0.4 });
+      squiggleAnimation.then(() => {
+        if (!cancelled) setScrollMode(true);
       });
     };
 
@@ -140,15 +142,16 @@ export function HeroSection() {
     const fallback = window.setTimeout(reveal, 1000);
 
     return () => {
+      cancelled = true;
       controls.stop();
+      squiggleAnimation?.stop();
       window.clearTimeout(fallback);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reduceMotion, lidRotation, squiggleOpacity]);
 
   // Phase 2: Bind motion values to scroll position
   useEffect(() => {
-    if (!scrollMode) return;
+    if (!scrollMode || reduceMotion) return;
 
     lidRotation.set(scrollLidRotation.get());
     squiggleOpacity.set(scrollSquiggleOpacity.get());
@@ -164,12 +167,11 @@ export function HeroSection() {
       unsubLid();
       unsubSquiggle();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scrollMode]);
+  }, [scrollMode, reduceMotion, lidRotation, squiggleOpacity, scrollLidRotation, scrollSquiggleOpacity]);
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center px-6 lg:px-10 pb-20">
-      {/* Fixed Title — scrolls away with nav */}
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen flex flex-col items-center px-6 lg:px-10 pb-20">
+      {/* Fixed title clears the content as the visitor scrolls. */}
       <motion.div
         className="fixed top-20 left-0 right-0 z-30 text-center pointer-events-none"
         style={{ y: titleY, opacity: titleOpacity }}
@@ -185,7 +187,7 @@ export function HeroSection() {
             textShadow:
               "4px 4px 0 rgba(0,0,0,0.12), 2px 2px 0 rgba(0,0,0,0.08)",
           }}
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
         >
@@ -225,7 +227,7 @@ export function HeroSection() {
         {/* Left: Head graphic + Squiggles — 65% width */}
         <motion.div
           className="relative flex-shrink-0 lg:w-[65%] flex justify-center overflow-visible pointer-events-none"
-          initial={{ x: -700 }}
+          initial={false}
           animate={{ x: 0 }}
           transition={
             reduceMotion
